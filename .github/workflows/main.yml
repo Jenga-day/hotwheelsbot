@@ -1,7 +1,7 @@
 name: Hot Wheels Tracker
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 jobs:
   check-stock:
