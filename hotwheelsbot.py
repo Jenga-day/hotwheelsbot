@@ -11,6 +11,8 @@ PINCODE = os.environ.get("MY_PINCODE")
 # Your Search List
 WISHLIST = ['porsche', 'skyline', 'nissan', 'bugatti', 'mazda', 'toyota', 'maggi']
 
+HEARTBEAT_HOUR = 6
+
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"}
