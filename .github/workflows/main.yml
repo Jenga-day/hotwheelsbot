@@ -1,22 +1,45 @@
 name: Hot Wheels Tracker
+
 on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
+
+# Prevent overlapping runs (a scrape can take longer than 5 minutes).
+concurrency:
+  group: hotwheels-tracker
+  cancel-in-progress: false
+
 jobs:
   check-stock:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - name: Install Tools
+          cache: pip
+
+      - name: Install dependencies
         run: |
-          pip install playwright requests
-          playwright install chromium
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      # Restore the state file from the most recent previous run so we can
+      # deduplicate alerts and track the daily heartbeat. Cache keys are
+      # immutable, so each run saves under a unique key and restores the latest
+      # matching prefix.
+      - name: Restore state
+        uses: actions/cache@v4
+        with:
+          path: state.json
+          key: hotwheels-state-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            hotwheels-state-
+
       - name: Run Bot
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
